@@ -3,7 +3,8 @@ import os
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-model = genai.GenerativeModel("models/gemini-pro")
+# Correct way to get the model
+model = genai.GenerativeModel(model_name="gemini-1.5-pro")
 
 def summarise_text(prompt):
     response = model.generate_content(f"Summarize this article:\n\n{prompt}")
