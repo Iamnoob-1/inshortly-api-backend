@@ -1,14 +1,17 @@
-import requests
+# summariser.py
+
+from transformers import pipeline
+
+# Initialize the summarization pipeline with a Hugging Face model
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
 def summarise_text(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-    headers = {"Content-Type": "application/json"}
-
-    payload = {"inputs": prompt}
-    response = requests.post(API_URL, headers=headers, json=payload)
-
     try:
-        result = response.json()
-        return result[0]["summary_text"]
+        # Generate the summary with reasonable length constraints
+        response = summarizer(prompt, max_length=60, min_length=20, do_sample=False)
+
+        # Extract the summary text from the first result
+        return response[0]['summary_text']
     except Exception as e:
+        # Catch and return any error message as a string
         return f"Error in response: {str(e)}"
