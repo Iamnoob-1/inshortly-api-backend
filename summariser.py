@@ -1,11 +1,14 @@
-import google.generativeai as genai
-import os
-
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-# Correct way to get the model
-model = genai.GenerativeModel(model_name="gemini-1.5-pro")
+import requests
 
 def summarise_text(prompt):
-    response = model.generate_content(f"Summarize this article:\n\n{prompt}")
-    return response.text.strip()
+    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+    headers = {"Content-Type": "application/json"}
+
+    payload = {"inputs": prompt}
+    response = requests.post(API_URL, headers=headers, json=payload)
+
+    try:
+        result = response.json()
+        return result[0]["summary_text"]
+    except Exception as e:
+        return f"Error in response: {str(e)}"
