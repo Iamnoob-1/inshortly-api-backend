@@ -1,17 +1,26 @@
-# summariser.py
+import requests
+import os
+from dotenv import load_dotenv
 
-from transformers import pipeline
+load_dotenv()  # Load .env contents
 
-# Initialize the summarization pipeline with a Hugging Face model
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+API_KEY = os.getenv("GEMINI_API_KEY")
 
-def summarise_text(prompt):
+def summarise_text(text):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={API_KEY}"
+    
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "contents": [
+            {
+                "parts": [{"text": f"Summarise this text:\n{text}"}]
+            }
+        ]
+    }
+
     try:
-        # Generate the summary with reasonable length constraints
-        response = summarizer(prompt, max_length=60, min_length=20, do_sample=False)
-
-        # Extract the summary text from the first result
-        return response[0]['summary_text']
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        return response.json()["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
-        # Catch and return any error message as a string
-        return f"Error in response: {str(e)}"
+        return f"Failed to summarise: {str(e)}"
